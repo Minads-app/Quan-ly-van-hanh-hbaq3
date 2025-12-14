@@ -17,6 +17,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let staffDataList = [];
+let packageDataList = []; // Lưu danh sách gói tập
 
 const loginView = document.getElementById('login-view');
 const mainView = document.getElementById('main-view');
@@ -47,9 +48,15 @@ onAuthStateChanged(auth, (user) => {
 window.navigate = function(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    
+    // Active menu item tương ứng (nếu có id khớp)
+    // ... code cũ ...
+
     const target = document.getElementById(`page-${pageId}`);
     if(target) target.classList.remove('hidden');
+
     if(pageId === 'hr') loadStaffList();
+    if(pageId === 'settings') loadPackageList(); // <--- THÊM DÒNG NÀY
 };
 
 window.openModal = function(modalId, mode = 'add', staffId = null) {
@@ -190,3 +197,119 @@ function formatDate(dateString) {
     const [year, month, day] = dateString.split('-');
     return `${day}/${month}/${year}`;
 }
+// ==========================================
+// MODULE: QUẢN LÝ GÓI TẬP (SETTINGS)
+// ==========================================
+
+window.loadPackageList = async function() {
+    const tbody = document.querySelector('#table-packages tbody');
+    tbody.innerHTML = "<tr><td colspan='4' class='text-center'>Đang tải...</td></tr>";
+    
+    try {
+        // Lấy dữ liệu từ collection 'packages'
+        const q = query(collection(db, "packages"), orderBy("updatedAt", "desc"));
+        const snapshot = await getDocs(q);
+        
+        packageDataList = [];
+        tbody.innerHTML = "";
+        
+        if (snapshot.empty) {
+            tbody.innerHTML = "<tr><td colspan='4' class='text-center'>Chưa có gói tập nào</td></tr>";
+            return;
+        }
+
+        snapshot.forEach(docSnap => {
+            const p = { id: docSnap.id, ...docSnap.data() };
+            packageDataList.push(p);
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${p.name}</b><br><small class="badge badge-dept">${p.subject}</small></td>
+                <td style="color: var(--primary); font-weight:bold">${parseInt(p.price).toLocaleString()} đ</td>
+                <td>${p.sessions} buổi <br> <small>${p.duration} ngày</small></td>
+                <td>
+                    <button class="btn-action btn-edit" onclick="openModalPackage('edit', '${p.id}')"><i class="fas fa-pen"></i></button>
+                    <button class="btn-action btn-delete" onclick="deletePackage('${p.id}')"><i class="fas fa-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (err) {
+        console.error(err);
+        tbody.innerHTML = `<tr><td colspan='4' class='text-center text-danger'>Lỗi: ${err.message}</td></tr>`;
+    }
+};
+
+window.openModalPackage = function(mode, pkgId = null) {
+    window.openModal('modal-package'); // Mở modal chung
+    const title = document.getElementById('modal-title-package');
+    const form = document.getElementById('form-package');
+    
+    if (mode === 'add') {
+        title.textContent = "Thêm gói tập mới";
+        form.reset();
+        document.getElementById('pkg-id').value = "";
+    } else {
+        title.textContent = "Cập nhật gói tập";
+        const pkg = packageDataList.find(p => p.id === pkgId);
+        if (pkg) {
+            document.getElementById('pkg-id').value = pkg.id;
+            document.getElementById('pkg-name').value = pkg.name;
+            document.getElementById('pkg-subject').value = pkg.subject;
+            document.getElementById('pkg-price').value = pkg.price;
+            document.getElementById('pkg-sessions').value = pkg.sessions;
+            document.getElementById('pkg-duration').value = pkg.duration;
+            document.getElementById('pkg-schedule').value = pkg.schedule || "";
+        }
+    }
+};
+
+window.savePackageData = async function() {
+    const name = document.getElementById('pkg-name').value;
+    const subject = document.getElementById('pkg-subject').value;
+    const price = document.getElementById('pkg-price').value;
+    const sessions = document.getElementById('pkg-sessions').value;
+    const duration = document.getElementById('pkg-duration').value;
+    const schedule = document.getElementById('pkg-schedule').value;
+    const pkgId = document.getElementById('pkg-id').value;
+
+    if (!name || !price || !sessions || !duration) {
+        alert("Vui lòng điền đủ thông tin bắt buộc!");
+        return;
+    }
+
+    const data = {
+        name, subject, 
+        price: Number(price), 
+        sessions: Number(sessions), 
+        duration: Number(duration),
+        schedule,
+        updatedAt: new Date()
+    };
+
+    try {
+        if (pkgId) {
+            await updateDoc(doc(db, "packages", pkgId), data);
+            alert("Cập nhật thành công!");
+        } else {
+            data.createdAt = new Date();
+            await addDoc(collection(db, "packages"), data);
+            alert("Thêm gói mới thành công!");
+        }
+        closeModal();
+        loadPackageList();
+    } catch (err) {
+        alert("Lỗi lưu dữ liệu: " + err.message);
+    }
+};
+
+window.deletePackage = async function(id) {
+    if (confirm("Bạn có chắc chắn muốn xóa gói tập này?")) {
+        try {
+            await deleteDoc(doc(db, "packages", id));
+            loadPackageList();
+        } catch (err) {
+            alert("Lỗi xóa: " + err.message);
+        }
+    }
+};
