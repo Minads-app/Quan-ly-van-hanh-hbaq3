@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // --- DÁN LẠI CONFIG CỦA BẠN VÀO ĐÂY ---
 const firebaseConfig = {
@@ -439,21 +439,70 @@ window.calculateAge = function() {
         }
     }
 };
+// Hàm kiểm tra trùng lặp SĐT
+window.checkDuplicateStudent = async function() {
+    const phoneInput = document.getElementById('sales-phone');
+    const phone = phoneInput.value.trim();
+    
+    if (phone.length < 9) return; // Chưa đủ số thì chưa check
 
+    // Query tìm trong database xem có SĐT này chưa
+    const q = query(collection(db, "students"), where("phone", "==", phone), limit(1));
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+        const oldData = snapshot.docs[0].data();
+        
+        // Hiện cảnh báo
+        const choice = confirm(
+            `⚠️ CẢNH BÁO TRÙNG LẶP!\n\n` +
+            `Số điện thoại ${phone} đã tồn tại trong hệ thống.\n` +
+            `Học viên: ${oldData.fullName}\n` +
+            `Ngày sinh: ${oldData.dob}\n\n` +
+            `• Bấm OK: Để tự động điền thông tin cũ (Đăng ký khóa mới cho khách cũ).\n` +
+            `• Bấm Cancel: Để tiếp tục nhập mới (Trường hợp trùng SĐT nhưng khác người).`
+        );
+
+        if (choice) {
+            // Tự động điền thông tin cũ vào form
+            document.getElementById('sales-name').value = oldData.fullName;
+            document.getElementById('sales-dob').value = oldData.dob;
+            document.getElementById('sales-gender').value = oldData.gender;
+            document.getElementById('sales-address').value = oldData.address;
+            document.getElementById('sales-card-id').value = oldData.cardId || ""; // Lấy thẻ cũ nếu có
+            
+            // Nếu có phụ huynh thì điền luôn
+            if(oldData.guardian) {
+                document.getElementById('sales-guardian').value = oldData.guardian;
+                document.getElementById('sales-guardian-phone').value = oldData.guardianPhone;
+                calculateAge(); // Để hiện form phụ huynh lên
+            }
+        } else {
+            // Nếu chọn Cancel, người dùng tự nhập, không làm gì cả
+            // Có thể clear input phone nếu muốn bắt buộc không trùng, nhưng ở đây ta cho phép trùng.
+        }
+    }
+};
 // 5. Lưu dữ liệu Học viên (Ghi danh)
 window.saveStudentData = async function() {
+    // 1. Lấy dữ liệu cơ bản
     const name = document.getElementById('sales-name').value;
     const phone = document.getElementById('sales-phone').value;
     const pkgId = document.getElementById('sales-package-select').value;
     const startDate = document.getElementById('sales-start-date').value;
     const coachId = document.getElementById('sales-coach').value;
+    
+    // 2. Lấy dữ liệu mới thêm
+    const paymentMethod = document.getElementById('sales-payment-method').value;
+    const receiptNumber = document.getElementById('sales-receipt-number').value;
+    const cardId = document.getElementById('sales-card-id').value;
 
     if (!name || !phone || !pkgId || !startDate) {
         alert("Vui lòng điền đủ: Tên, SĐT, Gói tập, Ngày bắt đầu");
         return;
     }
 
-    // Lấy thông tin chi tiết gói để lưu lịch sử (tránh trường hợp sau này sửa giá gói)
+    // Lấy thông tin chi tiết gói
     const pkgSelect = document.getElementById('sales-package-select');
     const pkgOption = pkgSelect.options[pkgSelect.selectedIndex];
     const pkgName = pkgOption.text;
@@ -461,26 +510,30 @@ window.saveStudentData = async function() {
     const totalSessions = parseInt(pkgOption.dataset.sessions);
 
     const data = {
-        fullName: name.toUpperCase(), // Tên viết hoa
+        fullName: name.toUpperCase(),
         dob: document.getElementById('sales-dob').value,
         gender: document.getElementById('sales-gender').value,
         phone,
+        cardId, // Lưu số thẻ tập
         address: document.getElementById('sales-address').value,
         guardian: document.getElementById('sales-guardian').value,
         guardianPhone: document.getElementById('sales-guardian-phone').value,
         
-        // Thông tin khóa học
+        // Thông tin khóa học & Thanh toán
         packageId,
-        packageName: pkgName, // Lưu cứng tên gói tại thời điểm mua
+        packageName: pkgName,
         coachId,
         tuition,
+        paymentMethod, // Lưu hình thức thanh toán
+        receiptNumber, // Lưu số phiếu thu
+        
         totalSessions,
-        sessionsLeft: totalSessions, // Mới đăng ký thì số buổi còn lại = tổng buổi
+        sessionsLeft: totalSessions,
         startDate,
         endDate: document.getElementById('sales-end-date').value,
         note: document.getElementById('sales-note').value,
         
-        status: 'active', // active, finished, reserved (bảo lưu)
+        status: 'active',
         createdAt: new Date()
     };
 
@@ -574,4 +627,5 @@ window.searchStudent = function() {
         row.style.display = text.includes(keyword) ? '' : 'none';
     });
 };
+
 
