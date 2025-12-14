@@ -83,3 +83,63 @@ th { color: var(--text-gray); font-size: 0.85rem; text-transform: uppercase; }
     .user-info { display: none; }
     .content-area { padding: 15px; }
 }
+/* ... Giữ nguyên các phần cũ ... */
+
+/* Cập nhật Brand color cho HBA (Màu cam bóng rổ hoặc Xanh) */
+:root {
+    --primary: #ea580c; /* Màu Cam đậm (Bóng rổ) */
+    --secondary: #0ea5e9; /* Màu Xanh (Bơi) */
+    --bg-body: #f8fafc;
+    --sidebar-width: 260px;
+}
+
+/* Form Styling mới */
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-group {
+    flex: 1; /* Chia đều không gian */
+    margin-bottom: 12px;
+}
+
+.form-input-sm {
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    outline: none;
+}
+
+.form-section-title {
+    margin-top: 15px;
+    margin-bottom: 10px;
+    color: #64748b;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 5px;
+}
+
+/* Modal body scroll */
+.modal-body {
+    max-height: 80vh; /* Giới hạn chiều cao modal */
+    overflow-y: auto; /* Cho phép cuộn dọc nếu form dài */
+}
+
+/* Badge (Nhãn màu) */
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.badge-dept { background: #e0f2fe; color: #0284c7; } /* Xanh nhạt */
+.badge-role { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+.text-small { font-size: 0.85rem; color: #64748b; }
+
+/* Responsive cho Mobile: Form chuyển về 1 cột */
+@media (max-width: 768px) {
+    .form-row { flex-direction: column; gap: 0; }
+    .modal { width: 95%; }
+}
