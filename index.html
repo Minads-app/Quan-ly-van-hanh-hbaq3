@@ -13,72 +13,47 @@
         <div class="login-card">
             <h2 style="color: var(--primary); margin-bottom: 10px;">HBA SYSTEM</h2>
             <p>Hệ thống quản lý đào tạo</p>
-            <button id="btn-login" class="btn-google">
-                <i class="fab fa-google"></i> Đăng nhập quản lý
-            </button>
+            <button id="btn-login" class="btn-google"><i class="fab fa-google"></i> Đăng nhập quản lý</button>
         </div>
     </div>
 
     <div id="main-view" class="view hidden">
         <aside class="sidebar">
-            <div class="brand">
-                <i class="fas fa-basketball-ball"></i> HBA MANAGER
-            </div>
+            <div class="brand"><i class="fas fa-basketball-ball"></i> HBA MANAGER</div>
             <div class="user-info">
                 <img id="avatar" src="" alt="Avatar">
-                <div>
-                    <span id="username">User</span>
-                    <small id="role" style="color: #60a5fa;">Loading...</small>
-                </div>
+                <div><span id="username">User</span><small id="role">Quản lý</small></div>
             </div>
             <nav>
                 <button onclick="navigate('dashboard')" class="nav-item active"><i class="fas fa-chart-pie"></i> Tổng quan</button>
                 <button onclick="navigate('hr')" class="nav-item"><i class="fas fa-id-card-alt"></i> Nhân sự (HR)</button>
                 <button onclick="navigate('sales')" class="nav-item"><i class="fas fa-user-graduate"></i> Học viên (Sales)</button>
-                <button onclick="navigate('ops')" class="nav-item"><i class="fas fa-clipboard-check"></i> Điểm danh & Lớp</button>
-                <button onclick="navigate('reports')" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> Báo cáo lương</button>
+                <button id="btn-logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
             </nav>
-            <button id="btn-logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
         </aside>
 
         <main class="content-area">
-            
             <section id="page-dashboard" class="page active">
-                <h1>Tổng quan HBA hôm nay</h1>
+                <h1>Tổng quan HBA</h1>
                 <div class="stats-grid">
+                    <div class="card stat"><h3>Nhân sự hoạt động</h3><p class="number" id="stat-staff-active">0</p></div>
                     <div class="card stat"><h3>Học viên mới</h3><p class="number">0</p></div>
-                    <div class="card stat"><h3>Lớp đang dạy</h3><p class="number">0</p></div>
-                    <div class="card stat"><h3>Doanh thu ngày</h3><p class="number">0đ</p></div>
                 </div>
             </section>
 
             <section id="page-hr" class="page hidden">
                 <div class="header-action">
-                    <div>
-                        <h1>Quản lý Nhân sự</h1>
-                        <p style="color:gray; font-size: 0.9rem">HLV Bóng rổ, Bơi lội, Cầu lông & Văn phòng</p>
-                    </div>
-                    <button class="btn-primary" onclick="openModal('modal-staff')"><i class="fas fa-plus"></i> Thêm nhân sự</button>
+                    <h1>Quản lý Nhân sự</h1>
+                    <button class="btn-primary" onclick="openModal('modal-staff', 'add')"><i class="fas fa-plus"></i> Thêm nhân sự</button>
                 </div>
                 
-                <div style="margin-bottom: 15px; display: flex; gap: 10px;">
-                    <select id="filter-dept" class="form-input-sm" onchange="loadStaffList()">
-                        <option value="all">Tất cả bộ môn</option>
-                        <option value="bongro">Bóng rổ</option>
-                        <option value="boi">Bơi lội</option>
-                        <option value="caulong">Cầu lông</option>
-                        <option value="vanphong">Văn phòng</option>
-                    </select>
-                </div>
-
                 <div class="table-container">
                     <table id="table-staff">
                         <thead>
                             <tr>
-                                <th>Họ tên / Email</th>
-                                <th>Vị trí & Bộ môn</th>
-                                <th>Liên hệ (Zalo)</th>
-                                <th>Ngân hàng</th>
+                                <th>Họ tên / Vị trí</th>
+                                <th>Thông tin CCCD</th>
+                                <th>Liên lạc & Nơi ở</th>
                                 <th>Trạng thái</th>
                                 <th>Thao tác</th>
                             </tr>
@@ -87,94 +62,71 @@
                     </table>
                 </div>
             </section>
-
-            <section id="page-sales" class="page hidden"><h1>Quản lý Học viên</h1><p>Đang cập nhật...</p></section>
-            <section id="page-ops" class="page hidden"><h1>Vận hành</h1><p>Đang cập nhật...</p></section>
-            <section id="page-reports" class="page hidden"><h1>Báo cáo</h1><p>Đang cập nhật...</p></section>
-
         </main>
     </div>
 
     <div id="modal-overlay" class="modal-overlay hidden">
         <div id="modal-staff" class="modal hidden">
             <div class="modal-header">
-                <h3>Hồ sơ nhân sự mới</h3>
+                <h3 id="modal-title">Hồ sơ nhân sự</h3>
                 <span class="close-modal" onclick="closeModal()">×</span>
             </div>
             <div class="modal-body">
                 <form id="form-staff">
-                    <h4 class="form-section-title">1. Thông tin cơ bản</h4>
+                    <input type="hidden" id="hr-id"> <h4 class="form-section-title">1. Thông tin cá nhân</h4>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Họ và tên *</label>
+                            <label>Họ và tên <span class="required">*</span></label>
                             <input type="text" id="hr-name" required placeholder="VD: Nguyễn Văn A">
                         </div>
                         <div class="form-group">
-                            <label>Email (Đăng nhập) *</label>
-                            <input type="email" id="hr-email" required placeholder="email@gmail.com">
+                            <label>Ngày sinh <span class="required">*</span></label>
+                            <input type="date" id="hr-dob" required>
                         </div>
                     </div>
-                    
+
+                    <h4 class="form-section-title">2. Thông tin CCCD</h4>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Số điện thoại (Zalo) *</label>
-                            <input type="text" id="hr-phone" required>
-                        </div>
-                        <div class="form-group">
-                            <label>CCCD/CMND *</label>
+                            <label>Số CCCD <span class="required">*</span></label>
                             <input type="text" id="hr-cccd" required>
                         </div>
-                    </div>
-
-                    <h4 class="form-section-title">2. Vị trí & Chuyên môn</h4>
-                    <div class="form-row">
                         <div class="form-group">
-                            <label>Vai trò (Role)</label>
-                            <select id="hr-role">
-                                <option value="coach">Huấn luyện viên (Coach)</option>
-                                <option value="reception">Lễ tân / Sales</option>
-                                <option value="admin">Quản lý (Admin)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Bộ môn / Phòng ban</label>
-                            <select id="hr-dept">
-                                <option value="bongro">🏀 Bóng rổ</option>
-                                <option value="boi">🏊 Bơi lội</option>
-                                <option value="caulong">🏸 Cầu lông</option>
-                                <option value="vanphong">💻 Văn phòng</option>
-                            </select>
+                            <label>Ngày cấp <span class="required">*</span></label>
+                            <input type="date" id="hr-issue-date" required>
                         </div>
                     </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Loại hợp đồng</label>
-                            <select id="hr-type">
-                                <option value="fulltime">Full-time (Lương cứng)</option>
-                                <option value="parttime">Part-time (Theo giờ)</option>
-                                <option value="commission">Ăn chia (Commission)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Ngày bắt đầu</label>
-                            <input type="date" id="hr-start-date">
-                        </div>
+                    <div class="form-group">
+                        <label>Nơi cấp <span class="required">*</span></label>
+                        <input type="text" id="hr-issue-place" required placeholder="VD: Cục CS QLHC về TTXH">
                     </div>
 
-                    <h4 class="form-section-title">3. Thông tin thanh toán</h4>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Tên Ngân hàng</label>
-                            <input type="text" id="hr-bank-name" placeholder="VD: Techcombank">
-                        </div>
-                        <div class="form-group">
-                            <label>Số tài khoản</label>
-                            <input type="text" id="hr-bank-num">
-                        </div>
+                    <h4 class="form-section-title">3. Địa chỉ cư trú</h4>
+                    <div class="form-group">
+                        <label>Nơi thường trú</label>
+                        <input type="text" id="hr-address-perm" placeholder="Theo sổ hộ khẩu">
+                    </div>
+                    <div class="form-group">
+                        <label>Nơi ở hiện tại <span class="required">*</span></label>
+                        <input type="text" id="hr-address-curr" required placeholder="Nơi đang sinh sống">
                     </div>
 
-                    <button type="submit" class="btn-primary" style="margin-top: 20px; width: 100%">Lưu hồ sơ nhân sự</button>
+                    <h4 class="form-section-title">4. Vị trí làm việc tại HBA</h4>
+                    <div class="form-group">
+                        <label>Vị trí đảm nhiệm <span class="required">*</span></label>
+                        <select id="hr-position" required>
+                            <option value="">-- Chọn vị trí --</option>
+                            <option value="Lễ tân">Lễ tân</option>
+                            <option value="Thu ngân">Thu ngân</option>
+                            <option value="Trực hồ">Trực hồ (Cứu hộ/Vận hành)</option>
+                            <option value="HLV Bơi">HLV Bơi</option>
+                            <option value="HLV Bóng rổ">HLV Bóng rổ</option>
+                            <option value="Trợ giảng BR">Trợ giảng Bóng rổ</option>
+                            <option value="Quản lý">Quản lý (Admin)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="btn-save-staff" style="margin-top: 20px; width: 100%">Lưu hồ sơ</button>
                 </form>
             </div>
         </div>
