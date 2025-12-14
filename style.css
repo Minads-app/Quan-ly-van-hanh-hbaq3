@@ -85,4 +85,39 @@ li {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
+
+}
+/* --- Code Mới thêm --- */
+
+/* Trạng thái công việc đã xong */
+li.completed {
+    text-decoration: line-through;
+    color: #888;
+    background-color: #e9ecef;
+    border-left-color: #28a745; /* Đổi viền sang màu xanh lá */
+}
+
+/* Bố cục lại từng dòng (li) để chứa nút xóa */
+li {
+    display: flex;
+    justify-content: space-between; /* Đẩy nội dung và nút xóa ra 2 bên */
+    align-items: center;
+    cursor: pointer; /* Hiển thị bàn tay khi di chuột vào */
+    transition: all 0.2s;
+}
+
+/* Nút xóa nhỏ gọn */
+.btn-delete {
+    background: #ff4757;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    margin-left: 10px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.btn-delete:hover {
+    background: #ff6b81;
 }
