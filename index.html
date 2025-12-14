@@ -27,6 +27,7 @@
                 <button onclick="navigate('dashboard')" class="nav-item active"><i class="fas fa-chart-pie"></i> Tổng quan</button>
                 <button onclick="navigate('hr')" class="nav-item"><i class="fas fa-id-card-alt"></i> Nhân sự (HR)</button>
                 <button onclick="navigate('sales')" class="nav-item"><i class="fas fa-user-graduate"></i> Học viên (Sales)</button>
+                <button onclick="navigate('settings')" class="nav-item"><i class="fas fa-cogs"></i> Cấu hình</button>
                 <button id="btn-logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
             </nav>
         </aside>
@@ -56,6 +57,27 @@
             <section id="page-sales" class="page hidden">
                 <h1>Module Sales (Đang phát triển V3.0)</h1>
             </section>
+            <section id="page-settings" class="page hidden">
+    <div class="header-action">
+        <h1>Quản lý Gói tập</h1>
+        <button class="btn-primary" onclick="openModal('modal-package', 'add')">
+            <i class="fas fa-plus"></i> Thêm gói mới
+        </button>
+    </div>
+    <div class="table-container">
+        <table id="table-packages">
+            <thead>
+                <tr>
+                    <th>Tên gói / Bộ môn</th>
+                    <th>Học phí</th>
+                    <th>Chi tiết (Buổi/Hạn)</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</section>
         </main>
     </div>
 
@@ -92,7 +114,58 @@
                 </form>
             </div>
         </div>
+        <div id="modal-package" class="modal hidden">
+    <div class="modal-header">
+        <h3 id="modal-title-package">Thông tin Gói tập</h3>
+        <span class="close-modal" onclick="closeModal()">×</span>
+    </div>
+    <div class="modal-body">
+        <form id="form-package">
+            <input type="hidden" id="pkg-id">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tên gói tập *</label>
+                    <input type="text" id="pkg-name" placeholder="VD: Bơi kèm riêng 1:1" required>
+                </div>
+                <div class="form-group">
+                    <label>Bộ môn *</label>
+                    <select id="pkg-subject" required>
+                        <option value="Bơi lội">Bơi lội</option>
+                        <option value="Bóng rổ">Bóng rổ</option>
+                        <option value="Cầu lông">Cầu lông</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Học phí (VNĐ) *</label>
+                    <input type="number" id="pkg-price" placeholder="VD: 3000000" required>
+                </div>
+                <div class="form-group">
+                    <label>Số buổi học *</label>
+                    <input type="number" id="pkg-sessions" placeholder="VD: 12" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Thời hạn (Ngày) *</label>
+                    <input type="number" id="pkg-duration" placeholder="VD: 45" required>
+                </div>
+                <div class="form-group">
+                    <label>Lịch học mặc định</label>
+                    <input type="text" id="pkg-schedule" placeholder="VD: T2-4-6 (17h-18h)">
+                </div>
+            </div>
+
+            <button type="button" class="btn-primary w-full mt-2" onclick="savePackageData()">Lưu gói tập</button>
+        </form>
+    </div>
+</div>
     </div>
     <script type="module" src="script.js"></script>
 </body>
 </html>
+
