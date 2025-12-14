@@ -3,26 +3,26 @@
    ========================================= */
 :root {
     /* Brand Colors - HBA System (Blue Theme) */
-    --primary: #2563eb;       /* Xanh dương đậm (Royal Blue) */
-    --primary-hover: #1d4ed8; /* Xanh đậm hơn khi hover */
-    --secondary: #0ea5e9;     /* Xanh da trời (Cyan) */
+    --primary: #2563eb;       /* Royal Blue */
+    --primary-hover: #1d4ed8; 
+    --secondary: #0ea5e9;     /* Cyan */
     
     /* Functional Colors */
-    --success: #10b981;       /* Xanh lá */
-    --danger: #ef4444;        /* Đỏ */
-    --warning: #f59e0b;       /* Vàng */
+    --success: #10b981;       /* Green */
+    --danger: #ef4444;        /* Red */
+    --warning: #f59e0b;       /* Yellow */
     
     /* Backgrounds & Text */
     --bg-body: #f1f5f9;       
-    --bg-sidebar: #0f172a;    /* Xanh đen thẫm */
+    --bg-sidebar: #0f172a;    /* Dark Blue Sidebar */
     --bg-white: #ffffff;
-    --text-dark: #1e293b;
+    --text-dark: #0f172a;     /* Darker text for better contrast */
     --text-gray: #64748b;
     --border-color: #e2e8f0;
 
     /* Dimensions */
     --sidebar-width: 260px;
-    --radius: 8px;
+    --radius: 6px; /* Bo góc nhẹ hơn cho hiện đại */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
@@ -63,8 +63,8 @@ body { background: var(--bg-body); color: var(--text-dark); height: 100vh; overf
 }
 
 .brand { 
-    font-size: 1.25rem; font-weight: 800; margin-bottom: 2rem; 
-    color: #60a5fa; /* Logo màu xanh sáng */
+    font-size: 1.25rem; font-weight: 800; margin-bottom: 1.5rem; 
+    color: #60a5fa; 
     display: flex; align-items: center; gap: 10px; 
     padding: 0 10px;
 }
@@ -82,8 +82,8 @@ body { background: var(--bg-body); color: var(--text-dark); height: 100vh; overf
 /* Navigation */
 .nav-item {
     background: transparent; border: none; color: #94a3b8;
-    width: 100%; padding: 12px 15px; text-align: left; cursor: pointer;
-    border-radius: var(--radius); margin-bottom: 5px; font-size: 0.95rem;
+    width: 100%; padding: 10px 15px; text-align: left; cursor: pointer;
+    border-radius: var(--radius); margin-bottom: 4px; font-size: 0.9rem;
     display: flex; align-items: center; gap: 12px; transition: all 0.2s;
 }
 .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
@@ -91,39 +91,37 @@ body { background: var(--bg-body); color: var(--text-dark); height: 100vh; overf
 
 .btn-logout { 
     margin-top: auto; background: rgba(239, 68, 68, 0.1); color: var(--danger); 
-    border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%;
+    border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px; border-radius: var(--radius); cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%;
 }
 .btn-logout:hover { background: var(--danger); color: white; }
 
 /* Content Area */
 .content-area { flex: 1; padding: 1.5rem 2rem; overflow-y: auto; background: var(--bg-body); }
 
-/* Header Action - FIX NÚT BẤM NHỎ */
+/* Header Action - Đảm bảo nút to đẹp */
 .header-action { 
     display: flex; justify-content: space-between; align-items: center; 
-    margin-bottom: 24px; 
+    margin-bottom: 20px; 
 }
 .header-action h1 { font-size: 1.5rem; color: var(--text-dark); font-weight: 700; }
 
 /* =========================================
    4. BUTTONS & COMPONENTS
    ========================================= */
-/* Button Styles */
 .btn-primary { 
     background: var(--primary); color: white; 
     padding: 10px 20px; border-radius: 6px; 
-    border: none; cursor: pointer; font-weight: 600; font-size: 0.95rem;
+    border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem;
     display: inline-flex; align-items: center; gap: 8px;
     transition: 0.2s; box-shadow: 0 2px 5px rgba(37, 99, 235, 0.3);
-    white-space: nowrap; /* Chống xuống dòng chữ */
+    white-space: nowrap;
 }
 .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
 
 .btn-google { background: #db4437; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 15px; }
 
-/* Action Buttons (In Table) */
 .btn-action { 
-    width: 32px; height: 32px; border-radius: 4px; border: none; background: transparent; cursor: pointer; transition: 0.2s; margin-right: 4px; font-size: 1rem;
+    width: 30px; height: 30px; border-radius: 4px; border: none; background: transparent; cursor: pointer; transition: 0.2s; margin-right: 4px; font-size: 0.9rem;
 }
 .btn-edit { color: var(--primary); } 
 .btn-edit:hover { background: #eff6ff; }
@@ -132,26 +130,23 @@ body { background: var(--bg-body); color: var(--text-dark); height: 100vh; overf
 .btn-resign { color: var(--warning); } 
 .btn-resign:hover { background: #fffbeb; }
 
-/* Stats Cards */
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 20px; }
-.card { background: var(--bg-white); padding: 20px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
-.stat h3 { color: var(--text-gray); font-size: 0.85rem; text-transform: uppercase; font-weight: 600; }
-.stat .number { font-size: 2rem; font-weight: 700; color: var(--text-dark); margin-top: 5px; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+.card { background: var(--bg-white); padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
+.stat h3 { color: var(--text-gray); font-size: 0.8rem; text-transform: uppercase; font-weight: 600; }
+.stat .number { font-size: 1.8rem; font-weight: 700; color: var(--text-dark); margin-top: 5px; }
 
-/* Tables */
-.table-container { background: var(--bg-white); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid var(--border-color); }
+.table-container { background: var(--bg-white); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid var(--border-color); }
 table { width: 100%; border-collapse: collapse; }
-th { background: #f8fafc; color: var(--text-gray); font-size: 0.8rem; text-transform: uppercase; font-weight: 700; padding: 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
-td { padding: 15px; border-bottom: 1px solid var(--border-color); color: var(--text-dark); vertical-align: middle; }
+th { background: #f8fafc; color: var(--text-gray); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); color: var(--text-dark); vertical-align: middle; }
 tr:hover { background: #fdfdfd; }
 
-/* Badges */
-.badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+.badge { padding: 3px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
 .badge-active { background: #dcfce7; color: #15803d; }
 .badge-inactive { background: #f1f5f9; color: var(--text-gray); }
 
 /* =========================================
-   5. FORMS & MODALS
+   5. FORMS & MODALS (COMPACT VERSION)
    ========================================= */
 .modal-overlay { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
@@ -159,33 +154,49 @@ tr:hover { background: #fdfdfd; }
     display: flex; justify-content: center; align-items: center; z-index: 1000; 
 }
 .modal { 
-    background: var(--bg-white); width: 550px; max-height: 90vh; 
-    border-radius: 12px; display: flex; flex-direction: column; 
-    animation: slideIn 0.25s ease-out; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); 
+    background: var(--bg-white); width: 600px; max-height: 90vh; 
+    border-radius: 8px; display: flex; flex-direction: column; 
+    animation: slideIn 0.2s ease-out; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); 
 }
+.modal.modal-lg { width: 900px; }
+
 .modal-header { 
-    padding: 15px 24px; border-bottom: 1px solid var(--border-color); 
+    padding: 12px 20px; border-bottom: 1px solid var(--border-color); 
     display: flex; justify-content: space-between; align-items: center; 
+    background: #f8fafc; /* Header hơi xám nhẹ để tách biệt */
 }
-.modal-header h3 { font-size: 1.1rem; font-weight: 700; color: var(--text-dark); }
-.close-modal { font-size: 1.5rem; cursor: pointer; color: var(--text-gray); }
+.modal-header h3 { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin: 0; }
+.close-modal { font-size: 1.5rem; cursor: pointer; color: var(--text-gray); line-height: 1; }
 .close-modal:hover { color: var(--danger); }
 
-.modal-body { padding: 24px; overflow-y: auto; }
-.form-row { display: flex; gap: 20px; margin-bottom: 15px; }
-.form-group { flex: 1; display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+/* Compact Body */
+.modal-body { padding: 20px; overflow-y: auto; }
 
-label { font-size: 0.9rem; font-weight: 600; color: var(--text-dark); }
+/* Thu hẹp khoảng cách các dòng input */
+.form-row { display: flex; gap: 15px; margin-bottom: 10px; }
+.form-group { flex: 1; display: flex; flex-direction: column; gap: 4px; } /* Gap nhỏ giữa label và input */
+
+/* Style cho Label & Input gọn hơn */
+label { font-size: 0.85rem; font-weight: 600; color: var(--text-dark); }
 input, select { 
-    width: 100%; padding: 10px; border: 1px solid #cbd5e1; 
-    border-radius: 6px; font-size: 0.95rem; outline: none; transition: 0.2s; 
+    width: 100%; padding: 8px 10px; /* Padding nhỏ hơn một chút */
+    border: 1px solid #cbd5e1; 
+    border-radius: 5px; font-size: 0.9rem; outline: none; transition: 0.2s; 
+    background: #fff;
 }
 input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+input[readonly] { background: #f1f5f9; color: #64748b; cursor: not-allowed; }
+
+/* Tiêu đề mục nhỏ gọn hơn */
 .form-section-title { 
-    margin: 20px 0 10px 0; color: var(--primary); font-size: 0.8rem; 
+    margin: 15px 0 8px 0; /* Giảm margin top/bottom */
+    color: var(--primary); font-size: 0.75rem; 
     font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-    border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; 
+    border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; 
 }
+.form-section-title:first-child { margin-top: 0; }
+
+.required { color: var(--danger); margin-left: 2px; }
 
 /* =========================================
    6. RESPONSIVE
@@ -198,7 +209,7 @@ input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px 
     .nav-item { padding: 8px; width: auto; margin: 0; }
     .nav-item span { display: none; }
     .content-area { padding: 15px; }
-    .header-action { flex-direction: row; }
+    .header-action { flex-direction: column; align-items: flex-start; gap: 10px; }
     .form-row { flex-direction: column; gap: 10px; }
     .modal { width: 95%; }
 }
