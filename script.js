@@ -45,18 +45,24 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
+// Tìm và thay thế hàm navigate cũ bằng hàm này
 window.navigate = function(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
     
-    // Active menu item tương ứng (nếu có id khớp)
-    // ... code cũ ...
-
     const target = document.getElementById(`page-${pageId}`);
     if(target) target.classList.remove('hidden');
 
+    // Logic tải dữ liệu cho từng trang
     if(pageId === 'hr') loadStaffList();
-    if(pageId === 'settings') loadPackageList(); // <--- THÊM DÒNG NÀY
+    if(pageId === 'settings') loadPackageList();
+    
+    if(pageId === 'sales') {
+        loadStudentList(); 
+        // Tải luôn danh sách Gói tập & Nhân viên để nạp vào Dropdown
+        if(packageDataList.length === 0) loadPackageList();
+        if(staffDataList.length === 0) loadStaffList(); 
+    }
 };
 
 window.openModal = function(modalId, mode = 'add', staffId = null) {
@@ -333,5 +339,239 @@ window.savePackageData = async function() {
         btnSave.textContent = originalText;
         btnSave.disabled = false;
     }
+};
+// ==========================================
+// MODULE: SALES (QUẢN LÝ HỌC VIÊN)
+// ==========================================
+let studentDataList = [];
+
+// 1. Mở Modal & Chuẩn bị dữ liệu Dropdown
+window.openModalSales = function(mode, studentId = null) {
+    window.openModal('modal-sales');
+    const form = document.getElementById('form-sales');
+    const title = document.getElementById('modal-title-sales');
+    
+    // Nạp dữ liệu vào Dropdown Gói tập
+    const pkgSelect = document.getElementById('sales-package-select');
+    pkgSelect.innerHTML = '<option value="">-- Chọn gói tập --</option>';
+    packageDataList.forEach(p => {
+        // Lưu giá trị gói vào thuộc tính data để dùng sau
+        pkgSelect.innerHTML += `<option value="${p.id}" 
+            data-price="${p.price}" data-sessions="${p.sessions}" data-duration="${p.duration}">
+            ${p.name} - ${parseInt(p.price).toLocaleString()}đ
+        </option>`;
+    });
+
+    // Nạp dữ liệu vào Dropdown HLV (Lọc những ai có chức vụ chứa chữ 'HLV' hoặc 'Coach')
+    const coachSelect = document.getElementById('sales-coach');
+    coachSelect.innerHTML = '<option value="">-- Chọn HLV --</option>';
+    staffDataList.forEach(s => {
+        if (s.position.includes("HLV") || s.position.includes("Coach") || s.position.includes("Trợ giảng")) {
+            coachSelect.innerHTML += `<option value="${s.id}">${s.fullName} (${s.position})</option>`;
+        }
+    });
+
+    if (mode === 'add') {
+        title.textContent = "Đăng ký khóa học mới";
+        form.reset();
+        document.getElementById('student-id').value = "";
+        document.getElementById('guardian-info').classList.add('hidden'); // Mặc định ẩn phụ huynh
+    } 
+    // (Phần Edit chúng ta sẽ làm sau khi test xong phần Add)
+};
+
+// 2. Logic "Smart Form" - Tự động điền thông tin Gói
+window.fillPackageInfo = function() {
+    const select = document.getElementById('sales-package-select');
+    const option = select.options[select.selectedIndex];
+    
+    if (option.value) {
+        // Lấy dữ liệu từ attribute data- (đã gán ở bước mở Modal)
+        document.getElementById('sales-price').value = parseInt(option.dataset.price).toLocaleString('vi-VN');
+        document.getElementById('sales-sessions').value = option.dataset.sessions;
+        document.getElementById('sales-duration').value = option.dataset.duration;
+        
+        // Nếu đã chọn ngày bắt đầu thì tính lại ngày kết thúc luôn
+        calculateEndDate();
+    } else {
+        document.getElementById('sales-price').value = "";
+        document.getElementById('sales-sessions').value = "";
+        document.getElementById('sales-duration').value = "";
+    }
+};
+
+// 3. Logic "Smart Form" - Tự động tính Ngày kết thúc
+window.calculateEndDate = function() {
+    const startDateVal = document.getElementById('sales-start-date').value;
+    const durationVal = document.getElementById('sales-duration').value;
+
+    if (startDateVal && durationVal) {
+        const startDate = new Date(startDateVal);
+        const duration = parseInt(durationVal);
+        
+        // Cộng ngày: Date + duration
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + duration);
+        
+        // Format YYYY-MM-DD để gán vào input date
+        document.getElementById('sales-end-date').value = endDate.toISOString().split('T')[0];
+    }
+};
+
+// 4. Logic "Smart Form" - Tự động tính Tuổi & Hiện Phụ huynh
+window.calculateAge = function() {
+    const dobVal = document.getElementById('sales-dob').value;
+    if (dobVal) {
+        const dob = new Date(dobVal);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+
+        // Logic: Dưới 18 tuổi thì hiện form Phụ huynh
+        const guardianSection = document.getElementById('guardian-info');
+        if (age < 18) {
+            guardianSection.classList.remove('hidden');
+        } else {
+            guardianSection.classList.add('hidden');
+        }
+    }
+};
+
+// 5. Lưu dữ liệu Học viên (Ghi danh)
+window.saveStudentData = async function() {
+    const name = document.getElementById('sales-name').value;
+    const phone = document.getElementById('sales-phone').value;
+    const pkgId = document.getElementById('sales-package-select').value;
+    const startDate = document.getElementById('sales-start-date').value;
+    const coachId = document.getElementById('sales-coach').value;
+
+    if (!name || !phone || !pkgId || !startDate) {
+        alert("Vui lòng điền đủ: Tên, SĐT, Gói tập, Ngày bắt đầu");
+        return;
+    }
+
+    // Lấy thông tin chi tiết gói để lưu lịch sử (tránh trường hợp sau này sửa giá gói)
+    const pkgSelect = document.getElementById('sales-package-select');
+    const pkgOption = pkgSelect.options[pkgSelect.selectedIndex];
+    const pkgName = pkgOption.text;
+    const tuition = parseInt(pkgOption.dataset.price);
+    const totalSessions = parseInt(pkgOption.dataset.sessions);
+
+    const data = {
+        fullName: name.toUpperCase(), // Tên viết hoa
+        dob: document.getElementById('sales-dob').value,
+        gender: document.getElementById('sales-gender').value,
+        phone,
+        address: document.getElementById('sales-address').value,
+        guardian: document.getElementById('sales-guardian').value,
+        guardianPhone: document.getElementById('sales-guardian-phone').value,
+        
+        // Thông tin khóa học
+        packageId,
+        packageName: pkgName, // Lưu cứng tên gói tại thời điểm mua
+        coachId,
+        tuition,
+        totalSessions,
+        sessionsLeft: totalSessions, // Mới đăng ký thì số buổi còn lại = tổng buổi
+        startDate,
+        endDate: document.getElementById('sales-end-date').value,
+        note: document.getElementById('sales-note').value,
+        
+        status: 'active', // active, finished, reserved (bảo lưu)
+        createdAt: new Date()
+    };
+
+    const btnSave = document.querySelector('#form-sales .btn-primary');
+    btnSave.textContent = "Đang xử lý...";
+    btnSave.disabled = true;
+
+    try {
+        await addDoc(collection(db, "students"), data);
+        alert("Đăng ký thành công! Đã tạo hồ sơ học viên.");
+        closeModal();
+        loadStudentList();
+    } catch (err) {
+        console.error(err);
+        alert("Lỗi: " + err.message);
+    } finally {
+        btnSave.textContent = "Hoàn tất đăng ký";
+        btnSave.disabled = false;
+    }
+};
+
+// 6. Tải danh sách học viên
+window.loadStudentList = async function() {
+    const tbody = document.querySelector('#table-students tbody');
+    tbody.innerHTML = "<tr><td colspan='6' class='text-center'>Đang tải dữ liệu...</td></tr>";
+
+    try {
+        const q = query(collection(db, "students"), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        
+        studentDataList = [];
+        tbody.innerHTML = "";
+
+        if (snapshot.empty) {
+            tbody.innerHTML = "<tr><td colspan='6' class='text-center'>Chưa có học viên nào</td></tr>";
+            return;
+        }
+
+        snapshot.forEach(docSnap => {
+            const s = { id: docSnap.id, ...docSnap.data() };
+            studentDataList.push(s);
+            
+            // Tìm tên HLV trong list staff (để hiển thị cho đẹp)
+            const coach = staffDataList.find(st => st.id === s.coachId);
+            const coachName = coach ? coach.fullName : "Chưa xếp lớp";
+
+            // Tính % tiến độ
+            const progress = ((s.totalSessions - s.sessionsLeft) / s.totalSessions) * 100;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <b>${s.fullName}</b> <br>
+                    <small><i class="fas fa-phone"></i> ${s.phone}</small>
+                </td>
+                <td>
+                    <span class="badge badge-dept">${s.packageName.split('-')[0]}</span><br>
+                    <small>HLV: ${coachName}</small>
+                </td>
+                <td>
+                    <b>${s.totalSessions - s.sessionsLeft}</b> / ${s.totalSessions} buổi
+                    <div style="background:#e2e8f0; height:6px; border-radius:3px; margin-top:5px; width: 100px;">
+                        <div style="background:var(--primary); height:100%; width:${progress}%; border-radius:3px;"></div>
+                    </div>
+                </td>
+                <td>
+                    <small>Start: ${formatDate(s.startDate)}</small><br>
+                    <small style="color:var(--danger)">End: ${formatDate(s.endDate)}</small>
+                </td>
+                <td><span class="badge badge-active">Đang học</span></td>
+                <td>
+                    <button class="btn-action btn-edit"><i class="fas fa-eye"></i></button>
+                    <button class="btn-action btn-delete"><i class="fas fa-print"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (err) {
+        console.error(err);
+        tbody.innerHTML = `<tr><td colspan='6'>Lỗi: ${err.message}</td></tr>`;
+    }
+};
+
+// Hàm tìm kiếm nhanh (Search)
+window.searchStudent = function() {
+    const keyword = document.getElementById('search-student').value.toLowerCase();
+    const rows = document.querySelectorAll('#table-students tbody tr');
+    
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(keyword) ? '' : 'none';
+    });
 };
 
