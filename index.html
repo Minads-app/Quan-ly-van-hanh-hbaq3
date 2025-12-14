@@ -3,31 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ứng Dụng Web Của Tôi</title>
-    
+    <title>Hệ Thống Quản Lý Đào Tạo</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-    <div class="app-container">
-        <header>
-            <h1>Xin chào!</h1>
-            <p id="user-status">Đang tải trạng thái...</p>
-        </header>
+    <div id="login-view" class="view active">
+        <div class="login-card">
+            <h2>Hệ Thống Quản Lý</h2>
+            <p>Vui lòng đăng nhập để tiếp tục</p>
+            <button id="btn-login" class="btn-google">
+                <i class="fab fa-google"></i> Đăng nhập bằng Google
+            </button>
+        </div>
+    </div>
 
-        <main>
-            <section id="auth-section">
-                <button id="btn-login" class="btn-primary">Đăng nhập với Google</button>
+    <div id="main-view" class="view hidden">
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fas fa-dumbbell"></i> GYM MANAGER
+            </div>
+            <div class="user-info">
+                <img id="avatar" src="" alt="Avatar">
+                <div>
+                    <span id="username">User</span>
+                    <small id="role">Loading...</small>
+                </div>
+            </div>
+            <nav>
+                <button onclick="navigate('dashboard')" class="nav-item active"><i class="fas fa-home"></i> Tổng quan</button>
+                <button onclick="navigate('hr')" class="nav-item"><i class="fas fa-users-cog"></i> Nhân sự (HR)</button>
+                <button onclick="navigate('sales')" class="nav-item"><i class="fas fa-user-plus"></i> Học viên & Sales</button>
+                <button onclick="navigate('ops')" class="nav-item"><i class="fas fa-calendar-check"></i> Vận hành & Lớp</button>
+                <button onclick="navigate('reports')" class="nav-item"><i class="fas fa-chart-line"></i> Báo cáo</button>
+            </nav>
+            <button id="btn-logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+        </aside>
+
+        <main class="content-area">
+            
+            <section id="page-dashboard" class="page active">
+                <h1>Tổng quan hôm nay</h1>
+                <div class="stats-grid">
+                    <div class="card stat"><h3>Học viên mới</h3><p class="number">0</p></div>
+                    <div class="card stat"><h3>Lớp đang chạy</h3><p class="number">0</p></div>
+                    <div class="card stat"><h3>Doanh thu</h3><p class="number">0đ</p></div>
+                </div>
             </section>
 
-            <section id="data-section" class="hidden">
-                <input type="text" id="input-data" placeholder="Nhập việc cần làm...">
-                <button id="btn-add" class="btn-secondary">Thêm</button>
-                <ul id="data-list">
-                    </ul>
-                <button id="btn-logout" class="btn-danger">Đăng xuất</button>
+            <section id="page-hr" class="page hidden">
+                <div class="header-action">
+                    <h1>Quản lý Nhân sự</h1>
+                    <button class="btn-primary" onclick="openModal('modal-staff')">+ Thêm nhân viên</button>
+                </div>
+                <div class="table-container">
+                    <table id="table-staff">
+                        <thead><tr><th>Tên</th><th>Vị trí</th><th>SĐT</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </section>
+
+            <section id="page-sales" class="page hidden">
+                <h1>Quản lý Học viên</h1>
+                <p>Chức năng đang phát triển...</p>
+            </section>
+
+            <section id="page-ops" class="page hidden">
+                <h1>Điểm danh & Lịch dạy</h1>
+                <p>Chức năng đang phát triển...</p>
+            </section>
+
+             <section id="page-reports" class="page hidden">
+                <h1>Báo cáo doanh thu & Lương</h1>
+                <p>Chức năng đang phát triển...</p>
+            </section>
+
         </main>
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div id="modal-staff" class="modal hidden">
+            <div class="modal-header">
+                <h3>Hồ sơ nhân viên</h3>
+                <span class="close-modal" onclick="closeModal()">×</span>
+            </div>
+            <div class="modal-body">
+                <form id="form-staff">
+                    <div class="form-group">
+                        <label>Họ và tên</label>
+                        <input type="text" id="staff-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email (Gmail)</label>
+                        <input type="email" id="staff-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Chức vụ</label>
+                        <select id="staff-role">
+                            <option value="coach">HLV (Coach)</option>
+                            <option value="reception">Lễ tân (Sales)</option>
+                            <option value="admin">Quản lý (Admin)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">Lưu hồ sơ</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="script.js"></script>
