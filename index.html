@@ -55,8 +55,32 @@
             </section>
             
             <section id="page-sales" class="page hidden">
-                <h1>Module Sales (Đang phát triển V3.0)</h1>
-            </section>
+    <div class="header-action">
+        <h1>Danh sách Học viên</h1>
+        <div style="display: flex; gap: 10px">
+            <input type="text" id="search-student" placeholder="Tìm tên hoặc SĐT..." style="width: 200px;" onkeyup="searchStudent()">
+            <button class="btn-primary" onclick="openModalSales('add')">
+                <i class="fas fa-user-plus"></i> Đăng ký mới
+            </button>
+        </div>
+    </div>
+    
+    <div class="table-container">
+        <table id="table-students">
+            <thead>
+                <tr>
+                    <th>Học viên</th>
+                    <th>Gói tập / HLV</th>
+                    <th>Tiến độ (Buổi)</th>
+                    <th>Thời hạn</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</section>
             <section id="page-settings" class="page hidden">
     <div class="header-action">
         <h1>Quản lý Gói tập</h1>
@@ -164,9 +188,117 @@
         </form>
     </div>
 </div>
+        <div id="modal-sales" class="modal modal-lg hidden">
+    <div class="modal-header">
+        <h3 id="modal-title-sales">Đăng ký khóa học</h3>
+        <span class="close-modal" onclick="closeModal()">×</span>
+    </div>
+    <div class="modal-body">
+        <form id="form-sales">
+            <input type="hidden" id="student-id">
+            
+            <h4 class="form-section-title">1. Thông tin học viên</h4>
+            <div class="form-row">
+                <div class="form-group" style="flex: 2;">
+                    <label>Họ và tên học viên *</label>
+                    <input type="text" id="sales-name" required placeholder="Viết hoa (VD: NGUYỄN VĂN A)">
+                </div>
+                <div class="form-group">
+                    <label>Ngày sinh *</label>
+                    <input type="date" id="sales-dob" required onchange="calculateAge()">
+                </div>
+                <div class="form-group">
+                    <label>Giới tính</label>
+                    <select id="sales-gender">
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Số điện thoại *</label>
+                    <input type="text" id="sales-phone" required>
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <label>Địa chỉ hiện tại</label>
+                    <input type="text" id="sales-address">
+                </div>
+            </div>
+
+            <div id="guardian-info" class="hidden">
+                <div class="form-row" style="background: #f8fafc; padding: 10px; border-radius: 6px;">
+                    <div class="form-group">
+                        <label>Phụ huynh/Giám hộ (< 18t)</label>
+                        <input type="text" id="sales-guardian" placeholder="Họ tên cha/mẹ">
+                    </div>
+                    <div class="form-group">
+                        <label>SĐT Phụ huynh</label>
+                        <input type="text" id="sales-guardian-phone">
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="form-section-title">2. Thông tin khóa học</h4>
+            <div class="form-row">
+                <div class="form-group" style="flex: 2;">
+                    <label>Chọn Gói tập *</label>
+                    <select id="sales-package-select" required onchange="fillPackageInfo()">
+                        <option value="">-- Chọn gói tập --</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label>HLV Phụ trách (Nếu có)</label>
+                    <select id="sales-coach">
+                        <option value="">-- Chọn HLV --</option>
+                        </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Học phí (Readonly)</label>
+                    <input type="text" id="sales-price" readonly class="bg-gray">
+                </div>
+                <div class="form-group">
+                    <label>Số buổi (Readonly)</label>
+                    <input type="number" id="sales-sessions" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Hạn dùng (Ngày)</label>
+                    <input type="number" id="sales-duration" readonly>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ngày bắt đầu *</label>
+                    <input type="date" id="sales-start-date" required onchange="calculateEndDate()">
+                </div>
+                <div class="form-group">
+                    <label>Ngày kết thúc (Dự kiến)</label>
+                    <input type="date" id="sales-end-date" readonly>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ghi chú thêm</label>
+                    <input type="text" id="sales-note" placeholder="VD: Đã đóng tiền mặt...">
+                </div>
+            </div>
+
+            <button type="button" class="btn-primary w-full mt-2" onclick="saveStudentData()">
+                <i class="fas fa-check"></i> Hoàn tất đăng ký
+            </button>
+        </form>
+    </div>
+</div>
     </div>
     <script type="module" src="script.js"></script>
 </body>
 </html>
+
 
 
