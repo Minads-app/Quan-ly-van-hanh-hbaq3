@@ -1,9 +1,9 @@
-// 1. Import thêm: deleteDoc, updateDoc, doc
+// 1. Import các hàm cần thiết (đã thêm 'where')
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, updateDoc, doc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// --- QUAN TRỌNG: DÁN LẠI CONFIG CỦA BẠN VÀO ĐÂY ---
+// 2. Cấu hình Firebase CỦA BẠN (Đã cập nhật)
 const firebaseConfig = {
   apiKey: "AIzaSyCRVCArz1o7EvPkMCJn353imoerFeJpUWg",
   authDomain: "webapp-hbaq3.firebaseapp.com",
@@ -17,7 +17,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Tham chiếu DOM
+// Các biến giao diện
 const btnLogin = document.getElementById('btn-login');
 const btnLogout = document.getElementById('btn-logout');
 const btnAdd = document.getElementById('btn-add');
@@ -27,16 +27,20 @@ const authSection = document.getElementById('auth-section');
 const dataSection = document.getElementById('data-section');
 const dataList = document.getElementById('data-list');
 
-// Biến toàn cục lưu user hiện tại
 let currentUser = null;
+let unsubscribe = null; // Biến để hủy theo dõi dữ liệu khi đăng xuất
 
-// --- AUTHENTICATION ---
+// --- XỬ LÝ ĐĂNG NHẬP ---
 btnLogin.addEventListener('click', () => {
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider).catch(err => alert(err.message));
+    signInWithPopup(auth, provider).catch(err => alert("Lỗi đăng nhập: " + err.message));
 });
 
-btnLogout.addEventListener('click', () => signOut(auth));
+btnLogout.addEventListener('click', () => {
+    // Khi đăng xuất thì hủy theo dõi dữ liệu cũ
+    if (unsubscribe) unsubscribe(); 
+    signOut(auth);
+});
 
 onAuthStateChanged(auth, (user) => {
     currentUser = user;
@@ -44,7 +48,7 @@ onAuthStateChanged(auth, (user) => {
         userStatus.textContent = `Xin chào, ${user.displayName}`;
         authSection.classList.add('hidden');
         dataSection.classList.remove('hidden');
-        loadData();
+        loadData(); // Tải dữ liệu của user này
     } else {
         userStatus.textContent = "Vui lòng đăng nhập";
         authSection.classList.remove('hidden');
@@ -53,9 +57,9 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// --- LOGIC DATABASE ---
+// --- XỬ LÝ DỮ LIỆU ---
 
-// 1. Thêm mới
+// Thêm mới (kèm uid người tạo)
 btnAdd.addEventListener('click', async () => {
     const text = inputData.value;
     if (!text) return;
@@ -63,46 +67,46 @@ btnAdd.addEventListener('click', async () => {
     try {
         await addDoc(collection(db, "todos"), {
             content: text,
-            isDone: false, // Mặc định là chưa làm xong
+            isDone: false,
             createdAt: Date.now(),
-            uid: currentUser.uid // Lưu ID người dùng để bảo mật sau này
+            uid: currentUser.uid // QUAN TRỌNG: Đánh dấu chủ sở hữu
         });
         inputData.value = '';
     } catch (e) {
-        console.error("Lỗi:", e);
+        console.error("Lỗi thêm:", e);
+        alert("Không thể thêm dữ liệu. Kiểm tra Console.");
     }
 });
 
-// 2. Tải dữ liệu và Tạo nút Xóa/Sửa
+// Tải dữ liệu (Chỉ tải của người dùng hiện tại)
 function loadData() {
-    // Chỉ tải dữ liệu CỦA NGƯỜI DÙNG ĐANG ĐĂNG NHẬP (Lọc theo uid)
-    // Hiện tại tạm thời lấy hết, bài sau sẽ học cách lọc 'where'
-    const q = query(collection(db, "todos"), orderBy("createdAt", "desc"));
+    if (!currentUser) return;
+
+    // QUERY PHỨC TẠP: Lọc theo UID + Sắp xếp theo Thời gian
+    // Lưu ý: Lần đầu chạy sẽ báo lỗi yêu cầu tạo Index trong Console (F12)
+    const q = query(
+        collection(db, "todos"), 
+        where("uid", "==", currentUser.uid), // Chỉ lấy của mình
+        orderBy("createdAt", "desc")        // Mới nhất lên đầu
+    );
     
-    onSnapshot(q, (snapshot) => {
+    unsubscribe = onSnapshot(q, (snapshot) => {
         dataList.innerHTML = "";
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
-            const id = docSnap.id; // Lấy ID của văn bản để xóa/sửa
+            const id = docSnap.id;
 
-            // Tạo thẻ li
             const li = document.createElement("li");
             li.textContent = data.content;
-            
-            // Nếu đã xong thì thêm class 'completed'
-            if (data.isDone) {
-                li.classList.add("completed");
-            }
+            if (data.isDone) li.classList.add("completed");
 
-            // A. Sự kiện: Click vào dòng chữ để đánh dấu Xong/Chưa xong
+            // Sự kiện click để đổi trạng thái
             li.addEventListener('click', () => toggleDone(id, data.isDone));
 
-            // B. Nút xóa
+            // Nút xóa
             const btnDelete = document.createElement("button");
-            btnDelete.textContent = "Xóa";
+            btnDelete.textContent = "X"; // Nút X gọn hơn cho mobile
             btnDelete.className = "btn-delete";
-            
-            // Ngăn sự kiện click lan ra ngoài (để không bị kích hoạt toggleDone khi bấm xóa)
             btnDelete.addEventListener('click', (e) => {
                 e.stopPropagation(); 
                 deleteTask(id);
@@ -111,19 +115,21 @@ function loadData() {
             li.appendChild(btnDelete);
             dataList.appendChild(li);
         });
+    }, (error) => {
+        // Bắt lỗi nếu chưa tạo Index
+        console.error("Lỗi tải dữ liệu:", error);
+        if (error.code === 'failed-precondition') {
+            alert("Lần đầu chạy query lọc + sắp xếp, bạn cần mở Console (F12) và bấm vào link Firebase cung cấp để tạo Index.");
+        }
     });
 }
 
-// 3. Hàm Xóa
 async function deleteTask(id) {
-    if(confirm("Bạn muốn xóa việc này?")) {
+    if(confirm("Xóa nhé?")) {
         await deleteDoc(doc(db, "todos", id));
     }
 }
 
-// 4. Hàm Đổi trạng thái (Xong/Chưa)
 async function toggleDone(id, currentStatus) {
-    await updateDoc(doc(db, "todos", id), {
-        isDone: !currentStatus // Đảo ngược trạng thái
-    });
+    await updateDoc(doc(db, "todos", id), { isDone: !currentStatus });
 }
