@@ -264,6 +264,7 @@ window.openModalPackage = function(mode, pkgId = null) {
     }
 };
 
+// CẬP NHẬT HÀM LƯU GÓI TẬP (Thông minh hơn)
 window.savePackageData = async function() {
     const name = document.getElementById('pkg-name').value;
     const subject = document.getElementById('pkg-subject').value;
@@ -271,45 +272,66 @@ window.savePackageData = async function() {
     const sessions = document.getElementById('pkg-sessions').value;
     const duration = document.getElementById('pkg-duration').value;
     const schedule = document.getElementById('pkg-schedule').value;
-    const pkgId = document.getElementById('pkg-id').value;
+    const pkgId = document.getElementById('pkg-id').value; // Lấy ID (nếu có)
 
+    // Validate dữ liệu
     if (!name || !price || !sessions || !duration) {
         alert("Vui lòng điền đủ thông tin bắt buộc!");
         return;
     }
 
+    // Chuẩn bị dữ liệu
     const data = {
         name, subject, 
         price: Number(price), 
         sessions: Number(sessions), 
         duration: Number(duration),
-        schedule,
+        schedule: schedule || "",
         updatedAt: new Date()
     };
 
+    const btnSave = document.querySelector('#form-package .btn-primary');
+    const originalText = btnSave.textContent;
+    btnSave.textContent = "Đang xử lý...";
+    btnSave.disabled = true;
+
     try {
         if (pkgId) {
-            await updateDoc(doc(db, "packages", pkgId), data);
-            alert("Cập nhật thành công!");
+            // TRƯỜNG HỢP 1: CẬP NHẬT (EDIT)
+            try {
+                // Cố gắng cập nhật
+                await updateDoc(doc(db, "packages", pkgId), data);
+                alert("Cập nhật thành công!");
+            } catch (err) {
+                // Nếu lỗi là do không tìm thấy gói (No document to update)
+                if (err.message.includes("No document to update")) {
+                    // Hỏi người dùng có muốn tạo mới luôn không
+                    if(confirm("Gói tập này không còn tồn tại trên hệ thống (có thể đã bị xóa). Bạn có muốn TẠO MỚI gói này không?")) {
+                        // Chuyển sang tạo mới
+                        data.createdAt = new Date();
+                        await addDoc(collection(db, "packages"), data);
+                        alert("Đã tạo mới thành công!");
+                    }
+                } else {
+                    // Nếu lỗi khác thì báo ra
+                    throw err;
+                }
+            }
         } else {
+            // TRƯỜNG HỢP 2: THÊM MỚI (ADD)
             data.createdAt = new Date();
             await addDoc(collection(db, "packages"), data);
             alert("Thêm gói mới thành công!");
         }
+
         closeModal();
-        loadPackageList();
+        loadPackageList(); // Tải lại danh sách ngay lập tức
     } catch (err) {
-        alert("Lỗi lưu dữ liệu: " + err.message);
+        console.error("Lỗi:", err);
+        alert("Có lỗi xảy ra: " + err.message);
+    } finally {
+        btnSave.textContent = originalText;
+        btnSave.disabled = false;
     }
 };
 
-window.deletePackage = async function(id) {
-    if (confirm("Bạn có chắc chắn muốn xóa gói tập này?")) {
-        try {
-            await deleteDoc(doc(db, "packages", id));
-            loadPackageList();
-        } catch (err) {
-            alert("Lỗi xóa: " + err.message);
-        }
-    }
-};
