@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng Dụng Web Của Tôi</title>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <h1>Xin chào!</h1>
+            <p id="user-status">Đang tải trạng thái...</p>
+        </header>
+
+        <main>
+            <section id="auth-section">
+                <button id="btn-login" class="btn-primary">Đăng nhập với Google</button>
+            </section>
+
+            <section id="data-section" class="hidden">
+                <input type="text" id="input-data" placeholder="Nhập việc cần làm...">
+                <button id="btn-add" class="btn-secondary">Thêm</button>
+                <ul id="data-list">
+                    </ul>
+                <button id="btn-logout" class="btn-danger">Đăng xuất</button>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>

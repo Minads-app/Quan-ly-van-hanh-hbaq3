@@ -1,0 +1,88 @@
+/* Reset cơ bản để giao diện đồng nhất trên mọi trình duyệt */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Mobile-First: Thiết kế cho màn hình nhỏ trước */
+.app-container {
+    background: white;
+    width: 100%;
+    max-width: 400px; /* Giới hạn chiều rộng giống app điện thoại */
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+h1 {
+    color: #1a1a1a;
+    font-size: 1.5rem;
+}
+
+/* Các thành phần UI (User Interface) */
+input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-bottom: 10px;
+}
+
+button:active {
+    opacity: 0.8;
+}
+
+.btn-primary { background-color: #007bff; color: white; }
+.btn-secondary { background-color: #28a745; color: white; }
+.btn-danger { background-color: #dc3545; color: white; }
+
+.hidden { display: none; }
+
+ul { list-style: none; margin-top: 1rem; }
+li {
+    background: #f8f9fa;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+}
+/* Media Query: Chỉ áp dụng cho màn hình PC (lớn hơn 768px) */
+@media (min-width: 768px) {
+    .app-container {
+        max-width: 600px; /* PC sẽ rộng hơn điện thoại một chút */
+    }
+    
+    /* Trên PC, hiệu ứng hover chuột vào nút bấm sẽ rõ hơn */
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+}
