@@ -485,73 +485,102 @@ window.checkDuplicateStudent = async function() {
 };
 // 5. Lưu dữ liệu Học viên (Ghi danh)
 window.saveStudentData = async function() {
-    // 1. Lấy dữ liệu cơ bản
-    const name = document.getElementById('sales-name').value;
-    const phone = document.getElementById('sales-phone').value;
-    const pkgId = document.getElementById('sales-package-select').value;
-    const startDate = document.getElementById('sales-start-date').value;
-    const coachId = document.getElementById('sales-coach').value;
-    
-    // 2. Lấy dữ liệu mới thêm
-    const paymentMethod = document.getElementById('sales-payment-method').value;
-    const receiptNumber = document.getElementById('sales-receipt-number').value;
-    const cardId = document.getElementById('sales-card-id').value;
-
-    if (!name || !phone || !pkgId || !startDate) {
-        alert("Vui lòng điền đủ: Tên, SĐT, Gói tập, Ngày bắt đầu");
-        return;
-    }
-
-    // Lấy thông tin chi tiết gói
-    const pkgSelect = document.getElementById('sales-package-select');
-    const pkgOption = pkgSelect.options[pkgSelect.selectedIndex];
-    const pkgName = pkgOption.text;
-    const tuition = parseInt(pkgOption.dataset.price);
-    const totalSessions = parseInt(pkgOption.dataset.sessions);
-
-    const data = {
-        fullName: name.toUpperCase(),
-        dob: document.getElementById('sales-dob').value,
-        gender: document.getElementById('sales-gender').value,
-        phone,
-        cardId, // Lưu số thẻ tập
-        address: document.getElementById('sales-address').value,
-        guardian: document.getElementById('sales-guardian').value,
-        guardianPhone: document.getElementById('sales-guardian-phone').value,
-        
-        // Thông tin khóa học & Thanh toán
-        packageId,
-        packageName: pkgName,
-        coachId,
-        tuition,
-        paymentMethod, // Lưu hình thức thanh toán
-        receiptNumber, // Lưu số phiếu thu
-        
-        totalSessions,
-        sessionsLeft: totalSessions,
-        startDate,
-        endDate: document.getElementById('sales-end-date').value,
-        note: document.getElementById('sales-note').value,
-        
-        status: 'active',
-        createdAt: new Date()
-    };
-
-    const btnSave = document.querySelector('#form-sales .btn-primary');
-    btnSave.textContent = "Đang xử lý...";
-    btnSave.disabled = true;
+    console.log("Đang chạy hàm saveStudentData...");
 
     try {
+        // 1. Hàm hỗ trợ lấy giá trị (tránh lỗi null)
+        const getVal = (id) => {
+            const el = document.getElementById(id);
+            if (!el) throw new Error(`Không tìm thấy thẻ có ID: ${id}`);
+            return el.value;
+        };
+
+        // --- SỬA TÊN BIẾN Ở ĐÂY (pkgId -> packageId) ---
+        const name = getVal('sales-name');
+        const phone = getVal('sales-phone');
+        const packageId = getVal('sales-package-select'); // Đã đổi tên thành packageId cho khớp
+        const startDate = getVal('sales-start-date');
+        const coachId = getVal('sales-coach');
+        
+        // Dữ liệu mới thêm
+        const paymentMethod = getVal('sales-payment-method');
+        const receiptNumber = getVal('sales-receipt-number');
+        const cardId = getVal('sales-card-id');
+
+        // 2. Kiểm tra dữ liệu bắt buộc
+        if (!name || !phone || !packageId || !startDate) {
+            alert("Vui lòng điền đủ các trường có dấu (*):\n- Họ tên\n- Số điện thoại\n- Gói tập\n- Ngày bắt đầu");
+            return;
+        }
+
+        // 3. Lấy thông tin chi tiết gói tập (để lưu tên và giá vào lịch sử)
+        const pkgSelect = document.getElementById('sales-package-select');
+        const pkgOption = pkgSelect.options[pkgSelect.selectedIndex];
+        
+        if (!pkgOption || !pkgOption.dataset.price) {
+            alert("Lỗi: Chưa chọn gói tập hợp lệ.");
+            return;
+        }
+
+        const pkgName = pkgOption.text; // Lấy tên gói hiển thị
+        const tuition = parseInt(pkgOption.dataset.price);
+        const totalSessions = parseInt(pkgOption.dataset.sessions);
+
+        // 4. Chuẩn bị dữ liệu gửi đi
+        const data = {
+            fullName: name.toUpperCase(),
+            dob: getVal('sales-dob'),
+            gender: getVal('sales-gender'),
+            phone,
+            cardId,
+            address: getVal('sales-address'),
+            guardian: getVal('sales-guardian'),
+            guardianPhone: getVal('sales-guardian-phone'),
+            
+            // Thông tin khóa học
+            packageId: packageId, // Bây giờ biến này đã tồn tại
+            packageName: pkgName,
+            coachId,
+            tuition,
+            paymentMethod,
+            receiptNumber,
+            
+            // Thông tin tiến độ
+            totalSessions,
+            sessionsLeft: totalSessions,
+            startDate,
+            endDate: getVal('sales-end-date'),
+            note: getVal('sales-note'),
+            
+            status: 'active',
+            createdAt: new Date()
+        };
+
+        // 5. Gửi lên Firebase
+        const btnSave = document.querySelector('#form-sales .btn-primary');
+        const originalText = btnSave.innerHTML;
+        btnSave.textContent = "Đang xử lý...";
+        btnSave.disabled = true;
+
         await addDoc(collection(db, "students"), data);
-        alert("Đăng ký thành công! Đã tạo hồ sơ học viên.");
+        
+        alert("✅ Đăng ký thành công!");
         closeModal();
-        loadStudentList();
-    } catch (err) {
-        console.error(err);
-        alert("Lỗi: " + err.message);
-    } finally {
-        btnSave.textContent = "Hoàn tất đăng ký";
+        loadStudentList(); // Tải lại danh sách ngay
+
+        // Khôi phục nút
+        btnSave.innerHTML = originalText;
         btnSave.disabled = false;
+
+    } catch (err) {
+        console.error("LỖI CHI TIẾT:", err);
+        alert("❌ Có lỗi xảy ra: " + err.message);
+        
+        const btnSave = document.querySelector('#form-sales .btn-primary');
+        if(btnSave) {
+            btnSave.textContent = "Hoàn tất đăng ký";
+            btnSave.disabled = false;
+        }
     }
 };
 
@@ -627,5 +656,6 @@ window.searchStudent = function() {
         row.style.display = text.includes(keyword) ? '' : 'none';
     });
 };
+
 
 
